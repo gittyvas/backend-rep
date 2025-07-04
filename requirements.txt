@@ -9,12 +9,14 @@ Flask-JWT-Extended==4.7.1
 Flask-MySQLdb==2.0.0
 google-auth==2.40.3
 google-auth-oauthlib==1.2.2
+gunicorn==23.0.0
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
 mysqlclient==2.2.7
 oauthlib==3.3.1
+packaging==25.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 PyJWT==2.10.1
