@@ -1,0 +1,8 @@
+# .gitignore
+venv/
+__pycache__/
+*.pyc
+client_secret.json
+backend/client_secret.json
+backend/client_secret.json
+backend/client_secret.json
