@@ -42,9 +42,9 @@ def google_login():
         f'?client_id={GOOGLE_CLIENT_ID}'
         f'&redirect_uri={GOOGLE_REDIRECT_URI}'
         f'&response_type=code'
-        f'&scope=email%20profile%20https://www.googleapis.com/auth/contacts.readonly'
+        f'&scope=email%20profile%20https://www.googleapis.com/auth/contacts.readonly%20https://www.googleapis.com/auth/contacts.other.readonly' # UPDATED LINE
         f'&access_type=offline' # Request a refresh token for long-term access
-        f'&prompt=consent'      # Forces user to re-consent, ensures refresh token on first login
+        f'&prompt=consent'       # Forces user to re-consent, ensures refresh token on first login
     )
 
 @app.route('/oauth2callback')
@@ -242,7 +242,7 @@ if __name__ == '__main__':
     # When deploying, do NOT use app.run() directly. Use a production WSGI server like Gunicorn or uWSGI.
     app.run(
         host='0.0.0.0', # Listen on all available network interfaces
-        port=5000,      # Listen on port 5000
-        debug=True      # Set to False in production for security and performance
+        port=5000,     # Listen on port 5000
+        debug=True     # Set to False in production for security and performance
         # ssl_context=('/path/to/your/certificate.crt', '/path/to/your/private.key') # Uncomment and configure if you need HTTPS
     )
