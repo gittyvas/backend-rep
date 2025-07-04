@@ -1,3 +1,94 @@
+#!/bin/bash
+
+echo "--- Starting Google OAuth & Contacts API Backend Setup ---"
+
+# --- 1. Verify current directory ---
+echo "Expected current directory: Your backend project root (e.g., where app.py and venv/ are)."
+echo "Current directory: $(pwd)"
+read -p "Is this the correct directory for your backend (Y/n)? " -n 1 -r
+echo # Add a newline after the read
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Please navigate to your backend project's root directory and run the script again."
+    exit 1
+fi
+
+# --- 2. Activate Virtual Environment ---
+VENV_DIR="venv" # Standard name for virtual environment folder
+if [ -d "$VENV_DIR" ]; then
+    echo -e "\n--- Activating virtual environment ---"
+    source "$VENV_DIR/bin/activate"
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to activate virtual environment. Ensure it's properly set up."
+        echo "You might need to run 'source $VENV_DIR/bin/activate' manually."
+        exit 1
+    fi
+    echo "Virtual environment activated."
+else
+    echo -e "\nError: Virtual environment '$VENV_DIR' not found in current directory."
+    echo "Please create and activate it first (e.g., 'python3 -m venv venv' then 'source venv/bin/activate')."
+    echo "Exiting, as dependencies cannot be installed without an active virtual environment."
+    exit 1
+fi
+
+# --- 3. Update requirements.txt and install dependencies ---
+echo -e "\n--- Updating requirements.txt and installing/updating dependencies ---"
+# Ensure all necessary packages are in requirements.txt
+echo "flask" >> requirements.txt
+echo "flask-cors" >> requirements.txt
+echo "flask-mysqldb" >> requirements.txt
+echo "flask-jwt-extended" >> requirements.txt
+echo "requests" >> requirements.txt
+echo "python-dotenv" >> requirements.txt
+
+# Remove duplicates and sort for cleanliness
+sort -u requirements.txt -o requirements.txt
+
+pip install -r requirements.txt
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to install Python dependencies. Please check your internet connection."
+    if [ -n "$VIRTUAL_ENV" ]; then deactivate; fi
+    exit 1
+fi
+echo "Python dependencies installed/updated successfully."
+
+# --- 4. IMPORTANT: Database Schema Update (Manual Step) ---
+echo -e "\n--- IMPORTANT: Database Schema Update (Manual Step) ---"
+echo "You need to add a 'google_refresh_token' column to your 'users' table."
+echo "Please run the following SQL command on your MySQL database:"
+echo "------------------------------------------------------------------------------------------------"
+echo "ALTER TABLE users ADD COLUMN google_refresh_token VARCHAR(512);"
+echo "------------------------------------------------------------------------------------------------"
+echo "You can do this using a MySQL client (like MySQL Workbench, DBeaver), phpMyAdmin, or the 'mysql' CLI."
+read -p "Press Enter once you have run the SQL command and confirmed the table is updated."
+
+# --- 5. IMPORTANT: Configure .env file (Manual Step) ---
+echo -e "\n--- IMPORTANT: Configure .env file (Manual Step) ---"
+echo "You need to add your Google OAuth credentials to your '.env' file."
+echo "Please open your '.env' file (e.g., 'nano .env') and add/update the following lines:"
+echo "------------------------------------------------------------------------------------------------"
+echo "GOOGLE_CLIENT_ID='YOUR_GOOGLE_CLIENT_ID'"
+echo "GOOGLE_CLIENT_SECRET='YOUR_GOOGLE_CLIENT_SECRET'"
+echo "GOOGLE_REDIRECT_URI='https://pullse.gitthit.com.ng/oauth2callback'"
+echo "------------------------------------------------------------------------------------------------"
+echo "Make sure to replace 'YOUR_GOOGLE_CLIENT_ID' and 'YOUR_GOOGLE_CLIENT_SECRET' with your actual credentials from Google Cloud Console."
+echo "The GOOGLE_REDIRECT_URI MUST EXACTLY MATCH the Authorized Redirect URI you configure in your Google Cloud Console for your OAuth 2.0 Client ID."
+echo "It should be: https://pullse.gitthit.com.ng/oauth2callback"
+read -p "Press Enter once you have updated your .env file."
+
+# --- 6. IMPORTANT: Update app.py Content (Manual Step) ---
+echo -e "\n--- IMPORTANT: Update app.py Content (Manual Step) ---"
+echo "Your 'app.py' needs significant updates to handle Google refresh tokens and fetch contacts."
+echo "For simplicity and accuracy, it's best to **replace the entire content of your current app.py**"
+echo "with the updated version provided below. This ensures all new imports, logic, and endpoints are present."
+echo " "
+echo "You can either:"
+echo "1. Manually copy and paste the content below into your 'app.py' file."
+echo "2. Run the command 'cat <<EOF > app.py' then paste the content, then type 'EOF' and press Enter."
+echo " "
+read -p "Press Enter to display the updated app.py content."
+
+# Display the full updated app.py content for copy-pasting
+cat << 'EOF_APP_PY'
 from flask import Flask, request, jsonify, redirect, session, url_for
 from flask_cors import CORS
 from flask_mysqldb import MySQL
@@ -246,3 +337,32 @@ if __name__ == '__main__':
         debug=True      # Set to False in production for security and performance
         # ssl_context=('/path/to/your/certificate.crt', '/path/to/your/private.key') # Uncomment and configure if you need HTTPS
     )
+EOF_APP_PY
+echo " "
+echo "Please ensure you have copied/pasted the above content into your 'app.py' file."
+read -p "Press Enter once you have updated app.py."
+
+# --- 7. Final Deployment Reminder ---
+echo -e "\n--- Final Steps: Deploying Your Backend ---"
+echo "1. Commit your changes to Git:"
+echo "   git add ."
+echo "   git commit -m \"Integrate Google OAuth and Contacts API\""
+echo "   git push origin main # Or your default branch"
+echo " "
+echo "2. Render will automatically redeploy your service."
+echo "   Ensure your 'Start Command' on Render is still: 'gunicorn backend.app:app'"
+echo "   (If you changed your repo structure, it might be 'gunicorn app:app' instead)."
+echo " "
+echo "3. Update your frontend to:"
+echo "   - Extract the JWT from the URL after Google login."
+echo "   - Store the JWT (e.g., in localStorage)."
+echo "   - Make authenticated requests to your new '/api/contacts' endpoint (e.g., on dashboard load)."
+echo "   - Display the contacts received from your backend."
+
+echo -e "\n--- Google OAuth & Contacts API Backend Setup Finished ---"
+
+# Deactivate venv at the end if it was activated by the script
+if [ -n "$VIRTUAL_ENV" ]; then
+    deactivate
+    echo "Virtual environment deactivated."
+fi
