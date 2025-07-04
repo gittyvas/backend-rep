@@ -123,7 +123,6 @@ if __name__ == '__main__':
     # When deploying, do NOT use app.run() directly. Use a production WSGI server like Gunicorn or uWSGI.
     app.run(
         host='0.0.0.0', # Listen on all available network interfaces
-        port=5000,      # Listen on port 5000
-        debug=True      # Set to False in production for security and performance
+        port=5000      # Listen on port 5000
         # ssl_context=('/path/to/your/certificate.crt', '/path/to/your/private.key') # Uncomment and configure if you need HTTPS
     )
